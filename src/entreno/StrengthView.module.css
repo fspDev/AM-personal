@@ -402,7 +402,7 @@
   transition-delay: 0s, 240ms;
 }
 
-/* Últimos 3 s: "Después" pasa de negro al rojo */
+/* Últimos 3 s: "Después" pasa de negro al ámbar */
 .stage[data-warn='true'] .sheet {
   background: var(--accent);
   color: var(--on-accent);

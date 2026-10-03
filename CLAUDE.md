@@ -14,7 +14,7 @@ La app se publica en `fspdev.github.io/ENTRENO/`, el mismo dominio que la del gi
 ## Convenciones
 
 - React + TypeScript + Vite, CSS Modules con las variables de `src/index.css`. Sin librerías de UI.
-- Colores: las paletas de `src/theme.ts` definen fondo y texto, y de ahí salen el resto de los tonos. No usar colores fijos en el CSS: usar las variables. El acento rojo (`--accent`) lleva texto blanco (`--on-accent`).
+- Colores: las paletas de `src/theme.ts` definen fondo y texto, y de ahí salen el resto de los tonos. No usar colores fijos en el CSS: usar las variables. El acento es el ámbar del gimnasio (`--accent`) y lleva texto oscuro (`--on-accent`); como texto o borde sobre el fondo usar `--accent-ink`.
 - Textos en español rioplatense (vos), números `es-AR`. Áreas táctiles ≥ 44 px.
 - Tiempos contra instantes de fin, nunca contando ticks. Lógica pura con tests de Vitest.
 

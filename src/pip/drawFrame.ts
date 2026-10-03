@@ -3,10 +3,10 @@ import type { PipFrame, PipTheme } from './frameModel'
 export const PIP_SIZE = 480
 
 const THEMES: Record<PipTheme, { bg: string; ink: string; muted: string; track: string; ring: string }> = {
-  // Te toca: rojo entero, se ve de reojo desde la otra punta del gimnasio.
-  accent: { bg: '#e3202f', ink: '#ffffff', muted: 'rgba(255,255,255,0.78)', track: 'rgba(255,255,255,0.25)', ring: '#ffffff' },
-  dark: { bg: '#141414', ink: '#f4f1ea', muted: '#a39e93', track: '#2b2a27', ring: '#e3202f' },
-  light: { bg: '#f4f1ea', ink: '#141414', muted: '#6b665d', track: '#dad4c8', ring: '#e3202f' },
+  // Te toca: ámbar entero, se ve de reojo desde la otra punta del gimnasio.
+  accent: { bg: '#f4b004', ink: '#141414', muted: 'rgba(20,20,20,0.72)', track: 'rgba(20,20,20,0.2)', ring: '#141414' },
+  dark: { bg: '#141414', ink: '#f4f1ea', muted: '#a39e93', track: '#2b2a27', ring: '#f4b004' },
+  light: { bg: '#f4f1ea', ink: '#141414', muted: '#6b665d', track: '#dad4c8', ring: '#d99c00' },
 }
 
 const DISPLAY = 'Anton, Impact, sans-serif'
@@ -34,7 +34,7 @@ export function drawFrame(ctx: CanvasRenderingContext2D, f: PipFrame) {
   ctx.textBaseline = 'alphabetic'
 
   // Arriba: qué momento es.
-  ctx.fillStyle = f.theme === 'accent' ? t.ink : f.theme === 'dark' ? t.ring : t.ink
+  ctx.fillStyle = f.theme === 'dark' ? t.ring : t.ink
   ctx.textAlign = 'left'
   fit(ctx, f.kicker, '800', LABEL, 34, W - pad * 2)
   ctx.fillText(f.kicker, pad, pad + 28)
@@ -88,7 +88,7 @@ export function drawFrame(ctx: CanvasRenderingContext2D, f: PipFrame) {
   ctx.fillText(f.sub, pad, W - 54)
 
   if (f.controls.legend) {
-    ctx.fillStyle = f.theme === 'accent' ? t.ink : t.ring
+    ctx.fillStyle = f.theme === 'dark' ? t.ring : t.ink
     fit(ctx, f.controls.legend, '800', LABEL, 22, W - pad * 2)
     ctx.fillText(f.controls.legend, pad, W - 20)
   }

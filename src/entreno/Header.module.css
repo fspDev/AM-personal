@@ -44,7 +44,7 @@
   color: var(--muted);
 }
 .pipOn {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .elapsed {
   min-width: 44px;

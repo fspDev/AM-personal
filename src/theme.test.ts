@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mix, PALETTES, paletteVars } from './theme'
+import { ACCENT, mix, PALETTES, paletteVars } from './theme'
 
 /** Contraste WCAG entre dos colores #rrggbb. */
 function contrast(a: string, b: string): number {
@@ -24,5 +24,11 @@ describe('paletas', () => {
     expect(contrast(v['--ink'], v['--bg'])).toBeGreaterThanOrEqual(7)
     expect(contrast(v['--muted'], v['--bg'])).toBeGreaterThanOrEqual(3)
     expect(contrast(v['--dark-text'], v['--dark-bg'])).toBeGreaterThanOrEqual(7)
+    // El ámbar usado como texto o borde sobre el fondo de la paleta.
+    expect(contrast(v['--accent-ink'], v['--bg'])).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('el texto sobre los botones ámbar se lee', () => {
+    expect(contrast('#141414', ACCENT)).toBeGreaterThanOrEqual(7)
   })
 })

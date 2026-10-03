@@ -21,7 +21,7 @@ export type Flotante = 'salir' | 'serie' | 'boton' | 'nunca'
 
 export const DEFAULT_SETTINGS: Settings = {
   nombre: '',
-  paleta: 'hueso',
+  paleta: 'zona4',
   restSeconds: 90,
   vibracion: true,
   sonido: true,
