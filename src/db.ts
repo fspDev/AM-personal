@@ -38,7 +38,7 @@ class AppDB extends Dexie {
   series!: EntityTable<SerieRow, 'id'>
 
   constructor() {
-    super('entreno')
+    super('am')
     this.version(1).stores({
       entrenos: 'id, empezadoAt, synced',
       series: 'id, entrenoId, exerciseId, hechaAt',

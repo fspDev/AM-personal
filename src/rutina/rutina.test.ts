@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { addDia, addBloque, newBloque } from './editor'
-import { addEjercicio, getEjercicios, rutinaEjemplo, toRutinaRow } from './store'
+import { addBloque, fromRow, newBloque } from './editor'
+import { rutinaFromDocs, toDayDocs } from './firestoreRutina'
 import { mapRutina, shortName, type RutinaRow } from './mapRutina'
 
 const bloque = (o: Partial<RutinaRow['dias'][number]['bloques'][number]> & { id: string; orden: number; tipo: 'fuerza' | 'tiempo' | 'circuito'; nombre: string }) => ({
@@ -67,28 +67,37 @@ describe('shortName', () => {
   })
 })
 
-describe('rutina local', () => {
-  it('la rutina de ejemplo se puede entrenar: días A y B, con bici al principio y al final', () => {
-    const r = mapRutina(toRutinaRow(rutinaEjemplo()))
-    expect(r.days.map((d) => d.letter)).toEqual(['A', 'B'])
-    const a = r.days[0].blocks
-    expect(a[0]).toMatchObject({ kind: 'tiempo', subtitle: 'Calentamiento', minutes: 8 })
-    expect(a[1]).toMatchObject({ kind: 'fuerza', exerciseId: 'sentadilla-con-barra', series: 4, reps: 8, weight: 40, restSeconds: 90 })
-    expect(r.days[1].blocks.some((b) => b.kind === 'circuito')).toBe(true)
+describe('plan guardado en Firestore', () => {
+  const plan = addBloque(
+    { id: 'r', nombre: 'Fuerza', dias: [{ id: 'd1', letra: 'A', bloques: [] }] },
+    'd1',
+    newBloque('fuerza', { id: 'b1', nombre: 'Sentadilla con barra', series: 4, reps: 8, pesoKg: 40, comentario: '  Bajá lento ', videoUrl: 'https://youtu.be/abc' }),
+  )
+  const docs = toDayDocs(plan, 1000)
+
+  it('guarda un documento por día con sus bloques, comentario y video', () => {
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).toMatchObject({ id: 'd1', letra: 'A', order: 1, updatedAt: 1000 })
+    expect(docs[0].bloques?.[0]).toMatchObject({ nombre: 'Sentadilla con barra', comentario: 'Bajá lento', video_url: 'https://youtu.be/abc' })
   })
 
-  it('un día vacío no se puede entrenar', () => {
-    const r = addDia({ id: 'r', nombre: 'R', dias: [] })
-    expect(mapRutina(toRutinaRow(r)).days).toEqual([])
-    const conUno = addBloque(r, r.dias[0].id, newBloque('fuerza', { nombre: 'Remo' }))
-    expect(mapRutina(toRutinaRow(conUno)).days).toHaveLength(1)
+  it('el estudiante ve la indicación y el video del profe', () => {
+    const b = mapRutina(rutinaFromDocs(docs, { nombre: 'Fuerza', publicadaAt: 2000 })).days[0].blocks[0]
+    expect(b).toMatchObject({ note: 'Bajá lento', video: 'https://youtu.be/abc', weight: 40 })
   })
 
-  it('un ejercicio nuevo queda en la biblioteca una sola vez, aunque se escriba distinto', () => {
-    const antes = getEjercicios().length
-    const e = addEjercicio('  Vuelos   laterales ')
-    expect(e).toMatchObject({ id: 'vuelos-laterales', nombre: 'Vuelos laterales', propio: true })
-    expect(addEjercicio('vuelos laterales').id).toBe('vuelos-laterales')
-    expect(getEjercicios()).toHaveLength(antes + 1)
+  it('el último peso del estudiante pisa el del plan, salvo que el profe publique después', () => {
+    const prefs = { sentadilla_con_barra: { weight: 45, updatedAt: 3000 } }
+    expect(rutinaFromDocs(docs, { publicadaAt: 2000 }, prefs).dias[0].bloques[0].peso_kg).toBe(45)
+    expect(rutinaFromDocs(docs, { publicadaAt: 4000 }, prefs).dias[0].bloques[0].peso_kg).toBe(40)
+  })
+
+  it('ida y vuelta al editor del panel', () => {
+    const back = fromRow(rutinaFromDocs(docs, { nombre: 'Fuerza' }))
+    expect(back.dias[0].bloques[0]).toMatchObject({ comentario: 'Bajá lento', videoUrl: 'https://youtu.be/abc', pesoKg: 40 })
+  })
+
+  it('un día sin bloques no se puede entrenar', () => {
+    expect(mapRutina(rutinaFromDocs([{ id: 'x', letra: 'B', order: 1, bloques: [] }], null)).days).toEqual([])
   })
 })

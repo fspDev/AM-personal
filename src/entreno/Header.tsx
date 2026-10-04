@@ -2,6 +2,7 @@ import { fmtTime } from '../format'
 import { blockProgress } from '../workout/selectors'
 import type { Workout } from '../workout/types'
 import { usePipUi } from '../pip/context'
+import { useNoteUi } from './noteContext'
 import styles from './Header.module.css'
 
 interface Props {
@@ -19,6 +20,7 @@ export function Header({ w, now, onExit, absolute }: Props) {
   const elapsed = Math.max(0, Math.floor(((w.finishedAt ?? now) - w.startedAt) / 1000))
   const cls = absolute ? styles.absolute : styles.flow
   const pip = usePipUi()
+  const note = useNoteUi()
 
   return (
     <div className={cls}>
@@ -32,6 +34,14 @@ export function Header({ w, now, onExit, absolute }: Props) {
           BLOQUE {w.index + 1} / {blocks.length}
         </div>
         <div className={styles.right}>
+          {note.available && (
+            <button className={styles.note} aria-label="Ver la indicación del profe" onClick={note.open}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+              </svg>
+              <span>PROFE</span>
+            </button>
+          )}
           {pip.manual && (
             <button
               className={`${styles.pip} ${pip.open ? styles.pipOn : ''}`}

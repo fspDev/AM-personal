@@ -1,6 +1,6 @@
 /**
  * Paletas de colores: el usuario elige fondo + texto y de ese par se calculan los tonos intermedios
- * (grises, bordes, superficies), así cualquier combinación queda prolija. El acento ámbar no cambia.
+ * (grises, bordes, superficies), así cualquier combinación queda prolija. El acento lima no cambia.
  */
 
 export interface Palette {
@@ -10,11 +10,11 @@ export interface Palette {
   ink: string
 }
 
-/** Ámbar de la marca del gimnasio. Con texto oscuro encima. */
-export const ACCENT = '#f4b004'
+/** Lima de la marca AM (ver src/ui/logoGeometry.ts). Con texto oscuro encima. */
+export const ACCENT = '#c6f135'
 
 export const PALETTES: Palette[] = [
-  { id: 'zona4', nombre: 'Zona 4', bg: '#181818', ink: '#ffffff' },
+  { id: 'am', nombre: 'AM', bg: '#121212', ink: '#ffffff' },
   { id: 'hueso', nombre: 'Hueso', bg: '#f4f1ea', ink: '#141414' },
   { id: 'blanco', nombre: 'Blanco', bg: '#ffffff', ink: '#111111' },
   { id: 'perla', nombre: 'Perla', bg: '#eceef1', ink: '#1a1f26' },
@@ -25,7 +25,7 @@ export const PALETTES: Palette[] = [
   { id: 'azul', nombre: 'Azul noche', bg: '#0f1826', ink: '#e8eef7' },
 ]
 
-export const DEFAULT_PALETTE = 'zona4'
+export const DEFAULT_PALETTE = 'am'
 
 const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
 const toHex = (rgb: number[]) => `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`
@@ -65,8 +65,8 @@ export function paletteVars(p: Palette): Record<string, string> {
     '--sheet-ink': p.ink,
     '--sheet-muted': mix(p.ink, p.bg, 0.45),
     '--sheet-fill': mix(p.bg, p.ink, dark ? 0.14 : 0.07),
-    // Sobre fondo claro el ámbar no se lee como texto: se oscurece.
-    '--accent-ink': dark ? ACCENT : mix(ACCENT, '#000000', 0.5),
+    // Sobre fondo claro el lima no se lee como texto: se oscurece.
+    '--accent-ink': dark ? ACCENT : mix(ACCENT, '#000000', 0.62),
     '--page-bg': mix(p.bg, p.ink, dark ? 0.04 : 0.05),
   }
 }

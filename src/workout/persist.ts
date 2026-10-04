@@ -1,6 +1,6 @@
 import type { Workout } from './types'
 
-const KEY = 'entreno:workout'
+const KEY = 'am:workout'
 /** Un entreno "en curso" más viejo que esto es un olvido, no una pausa. */
 const MAX_AGE_MS = 12 * 60 * 60 * 1000
 

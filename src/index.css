@@ -1,12 +1,12 @@
 :root {
   --bg: #f4f1ea;
   --ink: #141414;
-  /* Acento: ámbar. Va con texto oscuro encima (con blanco no se lee). */
-  --accent: #f4b004;
-  --accent-pressed: #d99c00;
-  --on-accent: #141414;
+  /* Acento: lima de la marca AM. Va con texto oscuro encima (con blanco no se lee). */
+  --accent: #c6f135;
+  --accent-pressed: #a9d21c;
+  --on-accent: #121212;
   /* El acento cuando se usa como TEXTO o borde sobre el fondo: lo ajusta la paleta para que se lea. */
-  --accent-ink: #f4b004;
+  --accent-ink: #c6f135;
   --muted: #6b665d;
   --muted-2: #9a948a;
   --fill: #e6e1d6;

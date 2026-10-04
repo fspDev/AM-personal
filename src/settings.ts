@@ -1,8 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
 export interface Settings {
-  /** Cómo te saluda la app. */
-  nombre: string
   /** Colores de fondo y texto (ver theme.ts). */
   paleta: string
   /** Descanso por defecto entre series, en segundos. */
@@ -20,8 +18,7 @@ export interface Settings {
 export type Flotante = 'salir' | 'serie' | 'boton' | 'nunca'
 
 export const DEFAULT_SETTINGS: Settings = {
-  nombre: '',
-  paleta: 'zona4',
+  paleta: 'am',
   restSeconds: 90,
   vibracion: true,
   sonido: true,
@@ -30,7 +27,7 @@ export const DEFAULT_SETTINGS: Settings = {
   flotante: 'salir',
 }
 
-const KEY = 'entreno:settings'
+const KEY = 'am:settings'
 const listeners = new Set<() => void>()
 let cache: Settings | null = null
 

@@ -1,4 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#F4B004"/>
-  <rect x="10" y="18" width="44" height="28" rx="5" fill="none" stroke="#141414" stroke-width="3" stroke-dasharray="5 3.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<rect width="64" height="64" rx="14" fill="#121212"/>
+<svg x="8.96" y="14" width="46.08" height="36" viewBox="0 0 128 100">
+<defs><clipPath id="am-clip-9-14-46"><rect width="128" height="100"/></clipPath></defs>
+<g clip-path="url(#am-clip-9-14-46)" fill="none" stroke-miterlimit="20">
+<path d="M8 120 L36 0 L64 120" stroke="#ffffff" stroke-width="16"/>
+<path d="M23 72 H49" stroke="#ffffff" stroke-width="12"/>
+<path d="M78 130 L78 0 L99 62 L120 0 L120 130" stroke="#c6f135" stroke-width="16"/>
+</g></svg>
 </svg>

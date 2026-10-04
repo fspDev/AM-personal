@@ -1,24 +1,44 @@
 import { createContext, useContext } from 'react'
+import type { AuthErrorCode } from '../backend/types'
 
-/** Versión de un solo usuario: no hay cuentas ni servidor, todo vive en el teléfono. */
 export interface Profile {
+  /** uid de la cuenta con la que entró. */
   id: string
-  rol: 'socio'
+  rol: 'estudiante' | 'profe'
+  /** Ficha del estudiante (`amStudents/{sid}`); `null` para el profe. */
+  sid: string | null
   nombre: string
   apellido: string
-  email: string
-  profeId: null
+  username: string
   profeNombre: string | null
-  profeEmail: string | null
 }
 
-export type AuthStatus = 'in'
+/**
+ * `sin-acceso`: la cuenta existe pero ya no tiene ficha (el profe le reseteó la contraseña o lo dio de baja).
+ */
+export type AuthStatus = 'loading' | 'out' | 'in' | 'sin-acceso'
+
+export type LoginResult = { ok: true } | { ok: false; reason: AuthErrorCode | 'ya-hay-profe' }
+
+export interface CrearProfeDatos {
+  nombre: string
+  apellido: string
+  clave: string
+}
 
 export interface AuthValue {
   status: AuthStatus
-  userId: string
-  profile: Profile
-  /** Sin servidor no hay nada que subir; queda para que el reproductor no cambie. */
+  userId: string | null
+  profile: Profile | null
+  /** Si ya se creó la cuenta del profe (`null` = todavía no se sabe, p. ej. sin señal). */
+  profeConfigurado: boolean | null
+  /** Usuario ("nombre.apellido", como lo escriba) + contraseña. Sirve para estudiantes y para el profe. */
+  login: (usuario: string, clave: string) => Promise<LoginResult>
+  /** Primera vez: crea la cuenta del profe. */
+  crearProfe: (d: CrearProfeDatos) => Promise<LoginResult>
+  cambiarClave: (actual: string, nueva: string) => Promise<LoginResult>
+  signOut: () => Promise<void>
+  /** Sube los entrenos pendientes (no hace nada sin cuenta o sin conexión). */
   syncNow: () => void
 }
 

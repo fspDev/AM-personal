@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import type { StoryData } from './story'
-import { LogoSlot } from '../ui/LogoSlot'
+import { Logo } from '../ui/Logo'
 import styles from './StoryCard.module.css'
 
 export const STORY_WIDTH = 1080
@@ -16,7 +16,7 @@ export const StoryCard = forwardRef<HTMLDivElement, { data: StoryData }>(functio
       <div className={styles.top}>
         <div className={styles.header}>
           <div>
-            <LogoSlot size="lg" />
+            <Logo size="lg" />
           </div>
           <div className={styles.date}>
             {data.weekday}
@@ -60,7 +60,7 @@ export const StoryCard = forwardRef<HTMLDivElement, { data: StoryData }>(functio
           </div>
         )}
         <div className={styles.footer}>
-          <span>ENTRENO</span>
+          <span>AM · PERSONAL TRAINER</span>
           {data.streak > 0 && <span>{data.streakLabel}</span>}
         </div>
       </div>

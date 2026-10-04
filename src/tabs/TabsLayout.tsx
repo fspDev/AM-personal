@@ -6,8 +6,8 @@ const ICON = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke
 const TABS = [
   { to: '/', label: 'Hoy', end: true, icon: <path d="M8 5v14l11-7z" /> },
   {
-    to: '/rutina',
-    label: 'Rutina',
+    to: '/plan',
+    label: 'Plan',
     end: false,
     icon: (
       <>
@@ -29,7 +29,7 @@ const TABS = [
   },
 ]
 
-/** Hoy / Rutina / Progreso / Perfil con la barra de navegación de abajo. */
+/** Hoy / Plan / Progreso / Perfil con la barra de navegación de abajo. */
 export function TabsLayout() {
   return (
     <div className={styles.root}>

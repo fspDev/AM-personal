@@ -170,3 +170,9 @@
   background: var(--ink);
   color: var(--bg);
 }
+
+.hasNote {
+  margin-right: 6px;
+  vertical-align: -2px;
+  color: var(--accent-ink);
+}

@@ -2,9 +2,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Se publica en GitHub Pages bajo /ENTRENO/. Comparte dominio con otras apps (fspdev.github.io):
-// por eso todo lo que se guarda en el teléfono lleva el prefijo "entreno:".
-const base = process.env.BASE ?? '/ENTRENO/'
+// Se publica en GitHub Pages bajo /AM-personal/. Comparte dominio con otras apps (fspdev.github.io):
+// por eso todo lo que se guarda en el teléfono lleva el prefijo "am:".
+const base = process.env.BASE ?? '/AM-personal/'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,21 +12,21 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // "prompt": la app nueva no se activa sola; el socio elige cuándo (nunca en medio de un entreno).
+      // "prompt": la app nueva no se activa sola; el estudiante elige cuándo (nunca en medio de un entreno).
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Entreno',
-        short_name: 'Entreno',
+        name: 'AM · Andrés Millares Personal Trainer',
+        short_name: 'AM',
         id: base,
-        description: 'Armá tu rutina y entrená bloque por bloque.',
+        description: 'Tu plan de entrenamiento, armado por tu profe.',
         lang: 'es-AR',
         start_url: base,
         scope: base,
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#181818',
-        theme_color: '#181818',
+        background_color: '#121212',
+        theme_color: '#121212',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },

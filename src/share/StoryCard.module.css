@@ -74,7 +74,7 @@
   flex-grow: 1;
 }
 .bottom {
-  background: var(--accent, #f4b004);
+  background: var(--accent, #c6f135);
   color: var(--on-accent, #141414);
   border-radius: 64px 64px 0 0;
   padding: 72px 96px 90px;

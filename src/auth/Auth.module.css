@@ -1,0 +1,117 @@
+.page {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: max(48px, calc(env(safe-area-inset-top, 0px) + 24px)) 24px max(32px, env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.grow {
+  flex-grow: 1;
+  min-height: 24px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.name {
+  font-family: var(--font-display);
+  font-size: min(52px, 13vw);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+}
+.tag {
+  margin-top: 6px;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.34em;
+  color: var(--muted);
+}
+.lead {
+  margin: 20px 0 0;
+  max-width: 320px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.label {
+  display: block;
+  font-family: var(--font-label);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+}
+.labelGap {
+  margin-top: 18px;
+}
+.input {
+  margin-top: 8px;
+  height: 60px;
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  background: var(--fill);
+  padding: 0 20px;
+  font: inherit;
+  font-size: 19px;
+  color: inherit;
+  outline: none;
+}
+.input:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.help {
+  margin-top: 8px;
+  min-height: 20px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.help[data-error='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.primary {
+  margin-top: 22px;
+  height: 64px;
+  border-radius: 32px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-label);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+}
+.primary:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.switch {
+  align-self: center;
+  margin-top: 14px;
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

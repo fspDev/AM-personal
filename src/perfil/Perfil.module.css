@@ -233,3 +233,60 @@
 .palette[aria-checked='true'] .paletteName {
   color: var(--ink);
 }
+
+.cuota {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--fill);
+}
+.cuota[data-alerta='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.cuota[data-alerta='true'] .hint {
+  color: inherit;
+  opacity: 0.75;
+}
+.claveForm {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.fieldLabel {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.field {
+  margin-top: 6px;
+  height: 50px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--fill);
+  padding: 0 16px;
+  font: inherit;
+  font-size: 17px;
+  color: inherit;
+}
+.field:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 1px;
+}
+.formActions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+.linkBtn {
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.small:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
