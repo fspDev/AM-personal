@@ -32,6 +32,8 @@ const ficha = { uid: ALUMNO, nombre: 'Juan', cuota: { monto: 1, dia: 10 } }
 const mocks = (profeExiste = true) => [
   { function: 'get', args: [{ exactValue: `${D}/amConfig/profe` }], result: profeExiste ? { value: { data: { uid: PROFE } } } : { undefined: {} } },
   { function: 'get', args: [{ exactValue: `${D}/amStudents/s1` }], result: { value: { data: ficha } } },
+  { function: 'get', args: [{ exactValue: `${D}/g653Config/profe` }], result: profeExiste ? { value: { data: { uid: PROFE } } } : { undefined: {} } },
+  { function: 'get', args: [{ exactValue: `${D}/g653Students/s1` }], result: { value: { data: ficha } } },
   { function: 'get', args: [{ anyValue: {} }], result: { value: { data: { role: 'client' } } } },
 ]
 
@@ -77,6 +79,16 @@ const cases = [
   ['653: un socio no se hace admin', 'DENY', req('socio', 'update', 'gymUsers/socio', { role: 'admin' }), { role: 'client' }],
   ['653: el socio lee su ficha', 'ALLOW', req('socio', 'get', 'gymUsers/socio'), { role: 'client' }],
 ]
+
+// 653 con panel de AM (colecciones g653*): los mismos casos, salvo que la cuenta del profe no se crea desde la app.
+const g653 = cases
+  .filter(([, , rq]) => /\/am(Config|Logins|Students|Exercises)\//.test(rq.path))
+  .map(([name, exp, rq, resource, profeExiste]) => {
+    const path = rq.path.replace(/\/am(Config|Logins|Students|Exercises)\//, '/g653$1/')
+    const nuevoProfe = /^la primera vez/.test(name)
+    return [`653: ${name}`, nuevoProfe ? 'DENY' : exp, { ...rq, path }, resource, profeExiste]
+  })
+cases.push(...g653)
 
 const testCases = cases.map(([, expectation, request, resource, profeExiste]) => ({
   expectation,
