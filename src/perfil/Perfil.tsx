@@ -8,7 +8,7 @@ import { fmtTime } from '../format'
 import { useDays } from '../rutina/useDays'
 import { updateSettings, useSettings, type Settings } from '../settings'
 import { askNotificationPermission, notificationPermission, showAlert } from '../notify'
-import { closePiP, isPiPOpen, isPiPSupported, lastPiPError, openPiP } from '../pip/pipEngine'
+import { closePiP, isIOS, isPiPOpen, isPiPSupported, lastPiPError, openPiP } from '../pip/pipEngine'
 import { PALETTES } from '../theme'
 import styles from './Perfil.module.css'
 
@@ -156,7 +156,7 @@ export function Perfil() {
                     return
                   }
                   const ok = await openPiP()
-                  setPipTest(ok ? '✓ Funcionó. Tocá de nuevo para cerrarla.' : `No se abrió: ${lastPiPError ?? 'motivo desconocido'}`)
+                  setPipTest(ok ? '✓ Funcionó. Tocá de nuevo para cerrarla.' : `No se abrió: ${lastPiPError ?? 'motivo desconocido'}${isIOS() ? ' En iPhone probá con iOS actualizado y abriendo la app desde Safari.' : ''}`)
                 }}
               >
                 PROBAR
@@ -165,7 +165,7 @@ export function Perfil() {
           </div>
         </>
       ) : (
-        <p className={styles.note}>Este navegador no permite ventanas flotantes. En Android usá Chrome actualizado.</p>
+        <p className={styles.note}>{isIOS() ? 'Este iPhone no permite ventanas flotantes desde la web. Actualizá iOS y probá abriendo la app desde Safari.' : 'Este navegador no permite ventanas flotantes. En Android usá Chrome actualizado.'}</p>
       )}
 
       <div className={styles.section} style={{ marginTop: 24 }}>

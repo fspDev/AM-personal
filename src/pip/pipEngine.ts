@@ -19,11 +19,60 @@ let autoOnLeave = false
 let openedByLeave = false
 const listeners = new Set<Listener>()
 
-export function isPiPSupported(): boolean {
-  return typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled
+/** Safari de iPhone no tiene la API estándar de ventana flotante: usa la suya (webkitSetPresentationMode). */
+type WebkitVideo = HTMLVideoElement & {
+  webkitSupportsPresentationMode?: (mode: string) => boolean
+  webkitSetPresentationMode?: (mode: 'inline' | 'picture-in-picture' | 'fullscreen') => void
+  webkitPresentationMode?: string
 }
 
-export const isPiPOpen = () => !!video && document.pictureInPictureElement === video
+const standardPiP = () => typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled
+const webkitPiP = () => typeof HTMLVideoElement !== 'undefined' && 'webkitSetPresentationMode' in HTMLVideoElement.prototype
+
+export const isIOS = () =>
+  typeof navigator !== 'undefined' && (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+
+export function isPiPSupported(): boolean {
+  return standardPiP() || webkitPiP()
+}
+
+export const isPiPOpen = () =>
+  !!video && (document.pictureInPictureElement === video || (video as WebkitVideo).webkitPresentationMode === 'picture-in-picture')
+
+/** Pide la ventana flotante por la API que tenga el navegador. */
+async function requestPiP(): Promise<void> {
+  if (!video) throw new Error('Sin video')
+  if (standardPiP()) {
+    watchWindow(await video.requestPictureInPicture())
+    return
+  }
+  const v = video as WebkitVideo
+  if (v.webkitSupportsPresentationMode && !v.webkitSupportsPresentationMode('picture-in-picture')) {
+    throw new Error('Este iPhone no permite la ventana flotante para este video.')
+  }
+  v.webkitSetPresentationMode?.('picture-in-picture')
+  // Safari no avisa si se niega: se espera el cambio de modo y, si no llega, se informa.
+  await new Promise<void>((resolve, reject) => {
+    if (v.webkitPresentationMode === 'picture-in-picture') return resolve()
+    const t = setTimeout(() => {
+      v.removeEventListener('webkitpresentationmodechanged', on)
+      reject(new Error('El iPhone no abrió la ventana flotante.'))
+    }, 1500)
+    const on = () => {
+      if (v.webkitPresentationMode !== 'picture-in-picture') return
+      clearTimeout(t)
+      v.removeEventListener('webkitpresentationmodechanged', on)
+      resolve()
+    }
+    v.addEventListener('webkitpresentationmodechanged', on)
+  })
+}
+
+function exitPiP() {
+  if (!isPiPOpen() || !video) return
+  if (document.pictureInPictureElement === video) void document.exitPictureInPicture().catch(() => {})
+  else (video as WebkitVideo).webkitSetPresentationMode?.('inline')
+}
 
 export function subscribePiP(l: Listener): () => void {
   listeners.add(l)
@@ -54,7 +103,7 @@ function setActionHandlers() {
   set('enterpictureinpicture', () => {
     if (!autoOnLeave || !video) return
     openedByLeave = true
-    video.requestPictureInPicture().catch(() => {
+    requestPiP().catch(() => {
       openedByLeave = false
     })
   })
@@ -77,7 +126,12 @@ function ensureElements() {
   video.setAttribute('autopictureinpicture', '')
   // Tiene que estar en el DOM (no display:none) para poder pedir PiP. Con su tamaño real (no 2×2): Android
   // toma de ahí la proporción de la ventana y, si no coincide con el video, lo estira.
-  Object.assign(video.style, { position: 'fixed', left: '-9999px', top: '0', width: `${start.w}px`, height: `${start.h}px`, pointerEvents: 'none' })
+  Object.assign(
+    video.style,
+    isIOS()
+      ? { position: 'fixed', left: '0', bottom: '0', width: '2px', height: '2px', opacity: '0.01', pointerEvents: 'none', zIndex: '-1' }
+      : { position: 'fixed', left: '-9999px', top: '0', width: `${start.w}px`, height: `${start.h}px`, pointerEvents: 'none' },
+  )
   document.body.appendChild(video)
 
   video.addEventListener('enterpictureinpicture', (e) => {
@@ -86,6 +140,11 @@ function ensureElements() {
   })
   video.addEventListener('leavepictureinpicture', () => {
     openedByLeave = false
+    emit()
+  })
+  // iPhone: los mismos avisos, con el evento de Safari.
+  video.addEventListener('webkitpresentationmodechanged', () => {
+    if ((video as WebkitVideo).webkitPresentationMode !== 'picture-in-picture') openedByLeave = false
     emit()
   })
   // El ⏯ de la ventanita pausa el video: lo usamos para pausar el cronómetro y lo
@@ -101,7 +160,7 @@ function ensureElements() {
       // Por si el navegador no usa el handler de arriba pero igual lo permite.
       if (autoOnLeave && video && !isPiPOpen()) {
         openedByLeave = true
-        video.requestPictureInPicture().catch(() => {
+        requestPiP().catch(() => {
           openedByLeave = false
         })
       }
@@ -109,7 +168,7 @@ function ensureElements() {
       // Android pausa los videos sin sonido en segundo plano: al volver, que siga.
       if (stream && video?.paused) void video.play().catch(() => {})
       // Si se abrió sola al salir, al volver a la app se cierra sola.
-      if (openedByLeave && isPiPOpen()) void document.exitPictureInPicture().catch(() => {})
+      if (openedByLeave && isPiPOpen()) exitPiP()
     }
   })
 }
@@ -117,8 +176,8 @@ function ensureElements() {
 const PLACEHOLDER: PipFrame = {
   theme: 'dark',
   kicker: 'ENTRENO',
-  big: 'TU LOGO',
-  unit: 'AQUÍ',
+  big: 'AM',
+  unit: '',
   title: 'ENTRENO',
   sub: '',
   ring: null,
@@ -224,7 +283,7 @@ export function disarmPiP() {
   autoOnLeave = false
   // Sin cuadro, el 'pause' que dispara video.pause() de abajo no ejecuta ningún comando.
   frame = null
-  if (isPiPOpen()) void document.exitPictureInPicture().catch(() => {})
+  exitPiP()
   stream?.getTracks().forEach((t) => t.stop())
   stream = null
   if (video) {
@@ -250,7 +309,7 @@ export async function openPiP(): Promise<boolean> {
     await ensureStream()
     if (!isPiPOpen()) {
       openedByLeave = false
-      watchWindow(await video!.requestPictureInPicture())
+      await requestPiP()
     }
     lastPiPError = null
     return true
@@ -261,5 +320,5 @@ export async function openPiP(): Promise<boolean> {
 }
 
 export function closePiP() {
-  if (isPiPOpen()) void document.exitPictureInPicture().catch(() => {})
+  exitPiP()
 }
