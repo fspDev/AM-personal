@@ -1,7 +1,7 @@
 # AM · Andrés Millares Personal Trainer
 
 App de entrenamiento con dos tipos de usuario:
-- **Estudiantes** (la app, `/`): ven el plan que les armó el profe y lo entrenan bloque por bloque (reproductor de ENTRENO: series con peso y descanso, bici por tiempo, circuitos, ventana flotante, progreso y récords). Cada ejercicio puede traer una indicación y un video de YouTube del profe (botón PROFE durante el entreno).
+- **Estudiantes** (la app, `/`): ven el plan que les armó el profe y lo entrenan bloque por bloque (reproductor de ENTRENO: series con peso y descanso, bici por tiempo, circuitos, ventana flotante, progreso y récords). Cada ejercicio puede traer una indicación y un video de YouTube del profe: durante el entreno la indicación está siempre a la vista (`entreno/NotaEnVivo.tsx`) y tocándola se abre entera con el video.
 - **Profe** (uno solo, `/panel`): da de alta estudiantes, arma y publica su plan, ve el registro de cada entreno, la evolución (constancia, peso por ejercicio, medidas) y las cuotas. Maneja la biblioteca de ejercicios (editar, eliminar, videos), su cuenta (nombre, usuario, contraseña, colores) y puede armar y entrenar **su propia rutina** con la app (`/panel/mi-rutina`).
 
 Viene de ENTRENO (`D:\Desktop\ENTRENO`, una versión de muestra sin servidor) con la capa de Firebase y el panel de la app de 653 Gym (`D:\Desktop\GymApp\app`).

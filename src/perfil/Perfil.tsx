@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import { store } from '../backend'
 import { problemaClave } from '../cuentas'
@@ -205,11 +204,6 @@ export function Perfil() {
       <div className={styles.section} style={{ marginTop: 24 }}>
         CUENTA
       </div>
-      {profile?.rol === 'profe' && (
-        <Link to="/panel" className={styles.panelLink}>
-          IR AL PANEL DEL PROFE
-        </Link>
-      )}
       <CambiarClave />
       <button className={styles.signOut} onClick={() => void signOut()}>
         Cerrar sesión
