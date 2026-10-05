@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { slugify } from '../keys'
 import { youtubeId, youtubeLink, youtubeThumb } from '../youtube'
-import { guardarEjercicio, loadEjercicios, type Ejercicio } from './api'
+import { eliminarEjercicio, GRUPOS, guardarEjercicio, loadEjercicios, type Ejercicio } from './api'
+import { Dialog } from './Dialog'
 import styles from './Ejercicios.module.css'
 import ui from './ui.module.css'
 
-/** Biblioteca del profe: cada ejercicio con su video; al sumarlo a un plan, el video viene solo. */
+/** Biblioteca del profe: cada ejercicio con su grupo y su video; al sumarlo a un plan, el video viene solo. */
 export function Ejercicios() {
   const [list, setList] = useState<Ejercicio[] | null>(null)
   const [q, setQ] = useState('')
+  const [grupo, setGrupo] = useState('')
   const [error, setError] = useState(false)
+  const [editando, setEditando] = useState<Ejercicio | 'nuevo' | null>(null)
+  const [borrar, setBorrar] = useState<Ejercicio | null>(null)
 
   const load = useCallback(() => {
     loadEjercicios()
@@ -21,91 +25,207 @@ export function Ejercicios() {
   }, [])
   useEffect(load, [load])
 
+  const grupos = useMemo(() => [...new Set([...GRUPOS, ...(list ?? []).map((e) => e.grupo).filter((g): g is string => !!g)])], [list])
   const visible = useMemo(() => {
     const t = slugify(q)
-    return (list ?? []).filter((e) => !t || e.id.includes(t) || slugify(e.grupo ?? '').includes(t))
-  }, [list, q])
-  const nuevo = q.trim() && list && !list.some((e) => e.id === slugify(q))
+    return (list ?? []).filter((e) => (!t || e.id.includes(t) || slugify(e.nombre).includes(t)) && (!grupo || e.grupo === grupo))
+  }, [list, q, grupo])
+  const conVideo = list?.filter((e) => e.video).length ?? 0
 
   return (
     <main className={ui.page}>
-      <h1 className={ui.title}>EJERCICIOS</h1>
-      <div className={ui.sub}>Cargá el video de técnica una vez y queda para todos los planes.</div>
-      <input className={ui.input} style={{ maxWidth: 360, marginTop: 20 }} placeholder="Buscar o agregar…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar ejercicio" />
-      {error && <p className={ui.error}>No pudimos cargar la biblioteca.</p>}
+      <div className={styles.head}>
+        <div>
+          <h1 className={ui.title}>EJERCICIOS</h1>
+          <div className={ui.sub}>
+            {list ? `${list.length} ejercicios · ${conVideo} con video. ` : ''}Cargá el video de técnica una vez y queda para todos los planes.
+          </div>
+        </div>
+        <button className={ui.primary} onClick={() => setEditando('nuevo')}>
+          + NUEVO EJERCICIO
+        </button>
+      </div>
+
+      <div className={styles.tools}>
+        <input className={`${ui.input} ${styles.search}`} placeholder="Buscar…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar ejercicio" />
+        <div className={styles.filters} role="group" aria-label="Grupo muscular">
+          <button className={styles.filter} aria-pressed={!grupo} onClick={() => setGrupo('')}>
+            Todos
+          </button>
+          {grupos
+            .filter((g) => list?.some((e) => e.grupo === g))
+            .map((g) => (
+              <button key={g} className={styles.filter} aria-pressed={grupo === g} onClick={() => setGrupo(grupo === g ? '' : g)}>
+                {g}
+              </button>
+            ))}
+        </div>
+      </div>
+
+      {error && <p className={ui.error}>No pudimos cargar la biblioteca. Revisá la conexión y probá de nuevo.</p>}
+
       <ul className={styles.list}>
-        {nuevo && (
-          <li>
+        {visible.map((e) => {
+          const id = youtubeId(e.video)
+          return (
+            <li key={e.id} className={styles.row}>
+              {id ? (
+                <a href={youtubeLink(e.video) ?? '#'} target="_blank" rel="noreferrer" aria-label={`Ver el video de ${e.nombre}`} className={styles.thumbLink}>
+                  <img className={styles.thumb} src={youtubeThumb(id)} alt="" width={96} height={54} loading="lazy" />
+                  <span className={styles.play} aria-hidden="true">
+                    ▶
+                  </span>
+                </a>
+              ) : (
+                <div className={styles.thumbEmpty}>Sin video</div>
+              )}
+              <div className={styles.info}>
+                <div className={styles.name}>{e.nombre}</div>
+                <div className={ui.hint}>{e.grupo ?? 'Sin grupo'}</div>
+              </div>
+              <div className={styles.rowActions}>
+                <button className={ui.ghost} onClick={() => setEditando(e)}>
+                  Editar
+                </button>
+                <button className={ui.iconBtn} aria-label={`Eliminar ${e.nombre}`} onClick={() => setBorrar(e)}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                  </svg>
+                </button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      {list && visible.length === 0 && <p className={ui.empty}>{list.length === 0 ? 'La biblioteca está vacía. Sumá el primer ejercicio.' : 'Ningún ejercicio coincide.'}</p>}
+
+      {editando && (
+        <EditarDialog
+          e={editando === 'nuevo' ? null : editando}
+          nombreInicial={editando === 'nuevo' ? q.trim() : ''}
+          grupos={grupos}
+          existentes={list ?? []}
+          onClose={() => setEditando(null)}
+          onSaved={() => {
+            setEditando(null)
+            load()
+          }}
+        />
+      )}
+      {borrar && (
+        <Dialog title="¿ELIMINAR?" text={`"${borrar.nombre}" sale de la biblioteca. Los planes que ya lo tienen no cambian.`} onClose={() => setBorrar(null)}>
+          <div className={ui.actions}>
+            <button className={ui.link} onClick={() => setBorrar(null)}>
+              No
+            </button>
             <button
-              className={ui.secondary}
+              className={ui.danger}
               onClick={async () => {
-                await guardarEjercicio({ nombre: q.trim().replace(/\s+/g, ' '), grupo: null, video: '' })
-                setQ('')
+                await eliminarEjercicio(borrar.id).catch(() => {})
+                setBorrar(null)
                 load()
               }}
             >
-              + Agregar “{q.trim()}”
+              SÍ, ELIMINAR
             </button>
-          </li>
-        )}
-        {visible.map((e) => (
-          <Fila key={e.id} e={e} onSaved={load} />
-        ))}
-      </ul>
+          </div>
+        </Dialog>
+      )}
     </main>
   )
 }
 
-function Fila({ e, onSaved }: { e: Ejercicio; onSaved: () => void }) {
-  const [video, setVideo] = useState(e.video)
-  const [state, setState] = useState<'idle' | 'saving' | 'ok'>('idle')
-  const id = youtubeId(video)
-  const bad = !!video.trim() && !id
-  const dirty = video.trim() !== e.video
+function EditarDialog({
+  e,
+  nombreInicial,
+  grupos,
+  existentes,
+  onClose,
+  onSaved,
+}: {
+  e: Ejercicio | null
+  nombreInicial: string
+  grupos: string[]
+  existentes: Ejercicio[]
+  onClose: () => void
+  onSaved: () => void
+}) {
+  const [nombre, setNombre] = useState(e?.nombre ?? nombreInicial)
+  const [grupo, setGrupo] = useState(e?.grupo ?? '')
+  const [video, setVideo] = useState(e?.video ?? '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const vid = youtubeId(video)
+  const videoMal = !!video.trim() && !vid
+  // Un ejercicio nuevo con el nombre de otro que ya existe lo pisaría.
+  const repetido = !e && existentes.some((x) => x.id === slugify(nombre))
+  const ok = !!nombre.trim() && !videoMal && !repetido
+
+  const submit = async (ev: FormEvent) => {
+    ev.preventDefault()
+    if (!ok) return
+    setBusy(true)
+    setError(null)
+    try {
+      await guardarEjercicio({ nombre: nombre.replace(/\s+/g, ' '), grupo: grupo || null, video }, e?.id)
+      onSaved()
+    } catch {
+      setError('No se pudo guardar. Probá de nuevo.')
+      setBusy(false)
+    }
+  }
 
   return (
-    <li className={styles.row}>
-      <div className={styles.info}>
-        <div className={styles.name}>{e.nombre}</div>
-        {e.grupo && <div className={ui.hint}>{e.grupo}</div>}
-      </div>
-      <div className={styles.video}>
-        {id ? (
-          <a href={youtubeLink(video) ?? '#'} target="_blank" rel="noreferrer" aria-label={`Ver el video de ${e.nombre}`}>
-            <img className={styles.thumb} src={youtubeThumb(id)} alt="" width={96} height={54} loading="lazy" />
-          </a>
-        ) : (
-          <div className={styles.thumbEmpty} aria-hidden="true">
-            ▶
+    <Dialog title={e ? 'EDITAR EJERCICIO' : 'NUEVO EJERCICIO'} onClose={onClose}>
+      <form onSubmit={submit}>
+        <label htmlFor="ej-nombre" className={ui.label}>
+          NOMBRE
+        </label>
+        <input id="ej-nombre" className={ui.input} value={nombre} onChange={(x) => setNombre(x.target.value)} autoFocus />
+        {repetido && (
+          <div className={ui.hint} style={{ marginTop: 6 }}>
+            Ya hay un ejercicio con ese nombre: editalo desde la lista.
           </div>
         )}
-        <input
-          className={ui.input}
-          style={{ marginTop: 0, background: 'var(--bg)' }}
-          placeholder="Link de YouTube"
-          inputMode="url"
-          value={video}
-          aria-invalid={bad}
-          aria-label={`Video de ${e.nombre}`}
-          onChange={(x) => {
-            setVideo(x.target.value)
-            setState('idle')
-          }}
-        />
-        <button
-          className={ui.secondary}
-          disabled={!dirty || bad || state === 'saving'}
-          onClick={async () => {
-            setState('saving')
-            await guardarEjercicio({ nombre: e.nombre, grupo: e.grupo, video }, e.id).catch(() => {})
-            setState('ok')
-            onSaved()
-          }}
-        >
-          {state === 'ok' && !dirty ? '✓' : 'Guardar'}
-        </button>
-      </div>
-      {bad && <div className={styles.bad}>Ese link no es de un video de YouTube.</div>}
-    </li>
+        {e && nombre.trim() !== e.nombre && (
+          <div className={ui.hint} style={{ marginTop: 6 }}>
+            Los planes ya armados conservan el nombre anterior.
+          </div>
+        )}
+
+        <label htmlFor="ej-grupo" className={ui.label}>
+          GRUPO MUSCULAR
+        </label>
+        <input id="ej-grupo" className={ui.input} list="ej-grupos" value={grupo} placeholder="Piernas, Espalda…" onChange={(x) => setGrupo(x.target.value)} />
+        <datalist id="ej-grupos">
+          {grupos.map((g) => (
+            <option key={g} value={g} />
+          ))}
+        </datalist>
+
+        <label htmlFor="ej-video" className={ui.label}>
+          VIDEO DE YOUTUBE
+        </label>
+        <div className={styles.videoRow}>
+          {vid && <img className={styles.thumbSmall} src={youtubeThumb(vid)} alt="" width={80} height={45} />}
+          <input id="ej-video" className={ui.input} inputMode="url" placeholder="Pegá el link (youtube.com o youtu.be)" value={video} aria-invalid={videoMal} onChange={(x) => setVideo(x.target.value)} />
+        </div>
+        {videoMal && (
+          <div className={ui.hint} style={{ marginTop: 6, fontWeight: 600, color: 'var(--ink)' }}>
+            Ese link no es de un video de YouTube.
+          </div>
+        )}
+
+        {error && <p className={ui.error}>{error}</p>}
+        <div className={ui.actions}>
+          <button type="button" className={ui.link} onClick={onClose}>
+            Cancelar
+          </button>
+          <button type="submit" className={ui.primary} disabled={!ok || busy}>
+            {busy ? 'GUARDANDO…' : 'GUARDAR'}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   )
 }

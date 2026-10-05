@@ -290,3 +290,19 @@
   opacity: 0.4;
   cursor: default;
 }
+
+.panelLink {
+  margin-top: 10px;
+  min-height: 52px;
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-label);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}

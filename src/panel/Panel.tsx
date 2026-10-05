@@ -3,6 +3,8 @@ import { useAuth } from '../auth/context'
 import { SinAcceso } from '../auth/SinAcceso'
 import { LogoMark } from '../ui/Logo'
 import { Ejercicios } from './Ejercicios'
+import { MiCuenta } from './MiCuenta'
+import { MiRutina } from './MiRutina'
 import { Estudiante } from './Estudiante'
 import { Estudiantes } from './Estudiantes'
 import styles from './Panel.module.css'
@@ -34,10 +36,18 @@ export function Panel() {
           <NavLink to="/panel/ejercicios" className={styles.link}>
             Ejercicios
           </NavLink>
+          <NavLink to="/panel/mi-rutina" className={styles.link}>
+            Mi rutina
+          </NavLink>
+          <NavLink to="/panel/cuenta" className={styles.link}>
+            Mi cuenta
+          </NavLink>
         </nav>
         <div className={styles.grow} />
         <div className={styles.who}>
-          <span>{profile.nombre} {profile.apellido}</span>
+          <NavLink to="/panel/cuenta" className={styles.whoName}>
+            {profile.nombre} {profile.apellido}
+          </NavLink>
           <button className={styles.out} onClick={() => void signOut()}>
             Salir
           </button>
@@ -46,6 +56,8 @@ export function Panel() {
       <Routes>
         <Route index element={<Estudiantes />} />
         <Route path="ejercicios" element={<Ejercicios />} />
+        <Route path="mi-rutina/*" element={<MiRutina />} />
+        <Route path="cuenta" element={<MiCuenta />} />
         <Route path="estudiante/:id/*" element={<Estudiante />} />
         <Route path="*" element={<Navigate to="/panel" replace />} />
       </Routes>

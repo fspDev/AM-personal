@@ -15,8 +15,8 @@ const TABS = [
   { to: '', label: 'Plan', end: true },
   { to: 'registro', label: 'Registro' },
   { to: 'evolucion', label: 'Evolución' },
-  { to: 'cuotas', label: 'Cuotas' },
-  { to: 'cuenta', label: 'Cuenta' },
+  { to: 'cuotas', label: 'Cuotas', soloEstudiantes: true },
+  { to: 'cuenta', label: 'Cuenta', soloEstudiantes: true },
 ]
 
 export interface TabProps {
@@ -24,8 +24,11 @@ export interface TabProps {
   reload: () => void
 }
 
-export function Estudiante() {
-  const sid = useParams().id ?? ''
+/** Ficha de un estudiante, o la rutina propia del profe (`propio`: sin cuotas ni cuenta). */
+export function Estudiante({ sid: sidProp, propio = false }: { sid?: string; propio?: boolean }) {
+  const param = useParams().id
+  const sid = sidProp ?? param ?? ''
+  const base = propio ? '/panel/mi-rutina' : `/panel/estudiante/${sid}`
   const [d, setD] = useState<Detalle | null | undefined>(undefined)
   const [error, setError] = useState(false)
   const [now] = useState(() => Date.now())
@@ -46,7 +49,7 @@ export function Estudiante() {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M15 6l-6 6 6 6" />
       </svg>
-      Estudiantes
+      {propio ? 'Panel' : 'Estudiantes'}
     </Link>
   )
 
@@ -77,11 +80,16 @@ export function Estudiante() {
         <div className={styles.headText}>
           <h1 className={styles.name}>{fullName(d.e).toUpperCase()}</h1>
           <div className={ui.sub}>
-            {d.e.username} · último entreno: {lastLabel(last, now).toLowerCase()}
+            {propio ? 'Tu rutina' : d.e.username} · último entreno: {lastLabel(last, now).toLowerCase()}
             {d.e.objetivo && ` · ${d.e.objetivo}`}
           </div>
         </div>
-        {tone && (
+        {propio && (
+          <Link to="/" className={ui.primary}>
+            ENTRENAR
+          </Link>
+        )}
+        {!propio && tone && (
           <span className={ui.badge} data-tone={tone}>
             {tone === 'alerta' && '! '}
             {estadoLabel(cuota)}
@@ -90,8 +98,8 @@ export function Estudiante() {
       </div>
 
       <nav className={styles.tabs} aria-label="Secciones del estudiante">
-        {TABS.map((t) => (
-          <NavLink key={t.label} to={`/panel/estudiante/${sid}${t.to ? `/${t.to}` : ""}`} end={t.end} className={styles.tab}>
+        {TABS.filter((t) => !(propio && t.soloEstudiantes)).map((t) => (
+          <NavLink key={t.label} to={`${base}${t.to ? `/${t.to}` : ''}`} end={t.end} className={styles.tab}>
             {t.label}
           </NavLink>
         ))}
@@ -101,8 +109,8 @@ export function Estudiante() {
         <Route index element={<EditorPlan d={d} reload={reload} />} />
         <Route path="registro" element={<Registro d={d} reload={reload} />} />
         <Route path="evolucion" element={<Evolucion d={d} reload={reload} />} />
-        <Route path="cuotas" element={<Cuotas d={d} reload={reload} />} />
-        <Route path="cuenta" element={<Ficha d={d} reload={reload} />} />
+        {!propio && <Route path="cuotas" element={<Cuotas d={d} reload={reload} />} />}
+        {!propio && <Route path="cuenta" element={<Ficha d={d} reload={reload} />} />}
         <Route path="*" element={<Navigate to="" replace />} />
       </Routes>
     </main>

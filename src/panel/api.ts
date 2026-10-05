@@ -71,7 +71,7 @@ export const fullName = (e: Pick<StudentDoc, 'nombre' | 'apellido'>) => `${e.nom
 /* ───────── Lectura ───────── */
 
 export async function loadEstudiantes(now = Date.now()): Promise<Resumen[]> {
-  const docs = await store.list(COL.students)
+  const docs = (await store.list(COL.students)).filter((d) => !esFichaProfe(d.id))
   const out = await Promise.all(
     docs.map(async (d) => {
       const e = asStudent(d.id, d.data)
@@ -243,19 +243,86 @@ export async function publicarPlan(sid: string, rutina: ERutina, version: number
 
 /* ───────── Biblioteca ───────── */
 
+export const GRUPOS = ['Piernas', 'Glúteos', 'Pecho', 'Espalda', 'Hombros', 'Brazos', 'Core', 'Cardio', 'Movilidad']
+
 export async function loadEjercicios(): Promise<Ejercicio[]> {
   const docs = await store.list(COL.exercises)
   const byId = new Map<string, Ejercicio>(BASE_EJERCICIOS.map((e) => [e.id, { ...e, video: '' }]))
   for (const d of docs) {
+    // Los de base no se pueden borrar del código: al eliminarlos quedan marcados como ocultos.
+    if (d.data.oculto) {
+      byId.delete(d.id)
+      continue
+    }
     const prev = byId.get(d.id)
     byId.set(d.id, { id: d.id, nombre: String(d.data.nombre ?? prev?.nombre ?? d.id), grupo: (d.data.grupo as string) ?? prev?.grupo ?? null, video: String(d.data.video ?? '') })
   }
   return [...byId.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
 }
 
+/**
+ * Crea o edita un ejercicio. Al renombrarlo se conserva el id (la clave del historial); los planes ya
+ * armados guardan su propia copia del nombre, así que no cambian.
+ */
 export async function guardarEjercicio(e: { nombre: string; grupo: string | null; video: string }, id = slugify(e.nombre)): Promise<string> {
-  await store.write([{ type: 'set', path: `${COL.exercises}/${id}`, data: { nombre: e.nombre.trim(), grupo: e.grupo, video: e.video.trim(), updatedAt: Date.now() }, merge: true }])
+  await store.write([
+    { type: 'set', path: `${COL.exercises}/${id}`, data: { nombre: e.nombre.trim(), grupo: e.grupo?.trim() || null, video: e.video.trim(), oculto: false, updatedAt: Date.now() }, merge: true },
+  ])
   return id
+}
+
+/** Lo saca de la biblioteca. Los planes que ya lo usan no cambian. */
+export async function eliminarEjercicio(id: string): Promise<void> {
+  await store.write([{ type: 'set', path: `${COL.exercises}/${id}`, data: { oculto: true, updatedAt: Date.now() }, merge: true }])
+}
+
+/* ───────── El profe ───────── */
+
+/** La rutina propia del profe vive en una ficha como la de un estudiante, con id fijo. */
+export const fichaProfeId = (uid: string) => `yo-${uid}`
+export const esFichaProfe = (sid: string) => sid.startsWith('yo-')
+
+/** Crea la ficha propia del profe si todavía no existe y devuelve su id. */
+export async function asegurarFichaProfe(p: { id: string; nombre: string; apellido: string; username: string }): Promise<string> {
+  const sid = fichaProfeId(p.id)
+  const doc = await store.get(sPath(sid))
+  if (!doc || !doc.nombre) {
+    const ficha: StudentDoc = {
+      nombre: p.nombre,
+      apellido: p.apellido,
+      username: p.username,
+      uid: p.id,
+      email: '',
+      telefono: '',
+      objetivo: '',
+      createdAt: Date.now(),
+      rutina: null,
+      cuota: { monto: 0, dia: 10 },
+    }
+    // merge: si ya entrenó antes de armar la ficha, conserva sus últimos pesos.
+    await store.write([{ type: 'set', path: sPath(sid), data: { ...ficha, ...(doc?.rutina ? { rutina: doc.rutina } : {}) }, merge: true }])
+  }
+  return sid
+}
+
+/**
+ * Nombre y usuario del profe. El usuario nuevo apunta a la misma cuenta interna (no cambia la contraseña);
+ * el viejo deja de servir.
+ */
+export async function guardarCuentaProfe(actual: { id: string; username: string }, d: { nombre: string; apellido: string; username: string }): Promise<void> {
+  const username = d.username
+  const ops: WriteOp[] = []
+  if (username !== actual.username) {
+    if (await store.get(`${COL.logins}/${username}`)) throw new Error('Ese usuario ya lo usa un estudiante.')
+    const old = (await store.get(`${COL.logins}/${actual.username}`)) as { email?: string } | null
+    ops.push(
+      { type: 'set', path: `${COL.logins}/${username}`, data: { email: old?.email ?? emailFor(actual.username), rol: 'profe' } },
+      { type: 'delete', path: `${COL.logins}/${actual.username}` },
+    )
+  }
+  ops.push({ type: 'update', path: `${COL.config}/profe`, data: { nombre: d.nombre.trim(), apellido: d.apellido.trim(), username } })
+  if (await store.get(sPath(fichaProfeId(actual.id)))) ops.push({ type: 'update', path: sPath(fichaProfeId(actual.id)), data: { nombre: d.nombre.trim(), apellido: d.apellido.trim(), username } })
+  await store.write(ops)
 }
 
 /* ───────── Cuotas ───────── */

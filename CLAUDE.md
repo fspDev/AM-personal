@@ -2,17 +2,18 @@
 
 App de entrenamiento con dos tipos de usuario:
 - **Estudiantes** (la app, `/`): ven el plan que les armó el profe y lo entrenan bloque por bloque (reproductor de ENTRENO: series con peso y descanso, bici por tiempo, circuitos, ventana flotante, progreso y récords). Cada ejercicio puede traer una indicación y un video de YouTube del profe (botón PROFE durante el entreno).
-- **Profe** (uno solo, `/panel`): da de alta estudiantes, arma y publica su plan, ve el registro de cada entreno, la evolución (constancia, peso por ejercicio, medidas) y las cuotas.
+- **Profe** (uno solo, `/panel`): da de alta estudiantes, arma y publica su plan, ve el registro de cada entreno, la evolución (constancia, peso por ejercicio, medidas) y las cuotas. Maneja la biblioteca de ejercicios (editar, eliminar, videos), su cuenta (nombre, usuario, contraseña, colores) y puede armar y entrenar **su propia rutina** con la app (`/panel/mi-rutina`).
 
 Viene de ENTRENO (`D:\Desktop\ENTRENO`, una versión de muestra sin servidor) con la capa de Firebase y el panel de la app de 653 Gym (`D:\Desktop\GymApp\app`).
 
 ## Datos (Firebase compartido con 653 Gym)
 
 Proyecto `somaapp-7166a`; todo lo de AM lleva prefijo `am`:
-- `amConfig/profe`: `{ uid, nombre, apellido, username }`. Se crea una sola vez desde la pantalla de ingreso ("Primera vez: crear la cuenta del profe") y las reglas no dejan cambiarlo.
+- `amConfig/profe`: `{ uid, nombre, apellido, username }`. Se crea una sola vez desde la pantalla de ingreso ("Primera vez: crear la cuenta del profe"); el profe puede cambiar nombre y usuario, nadie puede cambiar el `uid`. Al cambiar el usuario se crea `amLogins/{nuevo}` con la misma cuenta interna y se borra el viejo (solo entran usuarios registrados en `amLogins`).
 - `amLogins/{usuario}`: `{ email, sid, rol }`: con qué cuenta interna entra cada usuario. Se lee sin sesión (de a uno; no se lista).
 - `amStudents/{sid}`: ficha (`uid` = cuenta vigente, `cuota {monto, dia}`, `rutina {nombre, version, publicadaAt, dias}`, `exercisePrefs`) + subcolecciones `days` (plan), `logs` (entrenos, `src/syncFormat.ts`), `pagos`, `medidas`.
-- `amExercises/{slug}`: biblioteca del profe (nombre y video).
+- `amExercises/{slug}`: biblioteca del profe (nombre, grupo, video). Los de base están en `src/panel/biblioteca.ts`; eliminar marca `oculto: true`.
+- La rutina propia del profe es la ficha `amStudents/yo-{uid}` (`esFichaProfe`): no aparece en la lista de estudiantes ni tiene cuotas.
 
 **Cuentas sin servidor propio:** usuario `nombre.apellido` → cuenta interna `nombre.apellido@am-personal.app`. Sin servidor no se puede cambiar la contraseña de otra cuenta, así que el profe "resetea" creando una cuenta nueva (`nombre.apellido+2@…`) y apuntando `amLogins` y `amStudents.uid` a esa; la vieja queda sin acceso (pantalla `SinAcceso`). El estudiante cambia la suya desde Perfil (pide la actual). Ver `src/cuentas.ts` y `src/panel/api.ts`.
 

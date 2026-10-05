@@ -43,7 +43,7 @@ export const PROFE_PATH = `${COL.config}/profe`
 async function resolveProfile(user: AuthUser): Promise<Profile | null> {
   const profe = (await store.get(PROFE_PATH)) as ProfeConfig | null
   if (profe?.uid === user.uid) {
-    return { id: user.uid, rol: 'profe', sid: null, nombre: profe.nombre, apellido: profe.apellido ?? '', username: profe.username, profeNombre: profe.nombre }
+    return { id: user.uid, rol: 'profe', sid: `yo-${user.uid}`, nombre: profe.nombre, apellido: profe.apellido ?? '', username: profe.username, profeNombre: profe.nombre }
   }
   const [mine] = await store.list(COL.students, { where: ['uid', user.uid], limit: 1 })
   if (!mine) return null
@@ -68,6 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // La cuenta existe pero no tiene ficha: se sabe recién después de preguntarle al servidor.
   const [orphan, setOrphan] = useState<string | null>(null)
   const [profeConfigurado, setProfeConfigurado] = useState<boolean | null>(null)
+  // Sube cuando cambian los datos de la cuenta (el profe edita su nombre o usuario).
+  const [rev, setRev] = useState(0)
+  const refreshProfile = useCallback(() => setRev((n) => n + 1), [])
 
   useEffect(
     () =>
@@ -105,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setOrphan(null)
         setProfile(p)
         writeProfile(p)
-        if (p.sid) void store.write([{ type: 'update', path: `${COL.students}/${p.sid}`, data: { ultimoAcceso: Date.now() } }]).catch(() => {})
+        if (p.rol === 'estudiante' && p.sid) void store.write([{ type: 'update', path: `${COL.students}/${p.sid}`, data: { ultimoAcceso: Date.now() } }]).catch(() => {})
       })
       .catch(() => {
         /* sin señal: queda el guardado */
@@ -113,11 +116,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [user])
+  }, [user, rev])
 
   const userId = user?.uid ?? null
   const ownProfile = profile && profile.id === userId ? profile : null
-  const sid = ownProfile?.rol === 'estudiante' ? ownProfile.sid : null
+  const sid = ownProfile?.sid ?? null
 
   const syncNow = useCallback(() => {
     if (sid) void syncPending(sid)
@@ -139,8 +142,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const username = normalizeUsername(usuario)
     if (!username || !clave) return { ok: false, reason: 'datos' }
     try {
+      // Solo usuarios registrados: si el profe cambió su usuario, el viejo deja de servir.
       const entry = (await store.get(`${COL.logins}/${username}`)) as { email?: string } | null
-      await authApi.signIn(entry?.email ?? emailFor(username), clave)
+      if (!entry?.email) return { ok: false, reason: 'datos' }
+      await authApi.signIn(entry.email, clave)
       return { ok: true }
     } catch (e) {
       return fail(e)
@@ -202,8 +207,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let status: AuthStatus = !ready ? 'loading' : user ? 'in' : 'out'
     if (status === 'in' && orphan === userId) status = 'sin-acceso'
     else if (status === 'in' && !ownProfile) status = 'loading'
-    return { status, userId, profile: status === 'in' ? ownProfile : null, profeConfigurado, login, crearProfe, cambiarClave, signOut, syncNow }
-  }, [ready, user, userId, orphan, ownProfile, profeConfigurado, login, crearProfe, cambiarClave, signOut, syncNow])
+    return { status, userId, profile: status === 'in' ? ownProfile : null, profeConfigurado, login, crearProfe, cambiarClave, signOut, syncNow, refreshProfile }
+  }, [ready, user, userId, orphan, ownProfile, profeConfigurado, login, crearProfe, cambiarClave, signOut, syncNow, refreshProfile])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

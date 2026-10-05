@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import type { Block } from '../data'
 import { fmtKg, fmtTime } from '../format'
@@ -28,12 +29,20 @@ export function Plan() {
     <main className={styles.page}>
       <h1 className={styles.title}>MI PLAN</h1>
       {loading ? null : !rutina || !day ? (
-        <p className={styles.lead}>Tu profe todavía no te armó el plan. Apenas lo publique, aparece acá.</p>
+        <p className={styles.lead}>
+          {profile?.rol === 'profe' ? (
+            <>
+              Todavía no armaste tu rutina. <Link to="/panel/mi-rutina">Armala en el panel</Link>.
+            </>
+          ) : (
+            'Tu profe todavía no te armó el plan. Apenas lo publique, aparece acá.'
+          )}
+        </p>
       ) : (
         <>
           <p className={styles.lead}>
             {rutina.nombre}
-            {profile?.profeNombre ? ` · armado por ${profile.profeNombre}` : ''}
+            {profile?.rol === 'estudiante' && profile.profeNombre ? ` · armado por ${profile.profeNombre}` : ''}
           </p>
 
           {days.length > 1 && (
@@ -68,7 +77,13 @@ export function Plan() {
               </li>
             ))}
           </ol>
-          <p className={styles.hint}>El peso arranca donde lo dejaste la última vez. Si tu profe lo cambia, manda el del profe.</p>
+          <p className={styles.hint}>
+            {profile?.rol === 'profe' ? (
+              <Link to="/panel/mi-rutina">Editar mi rutina en el panel</Link>
+            ) : (
+              'El peso arranca donde lo dejaste la última vez. Si tu profe lo cambia, manda el del profe.'
+            )}
+          </p>
         </>
       )}
     </main>

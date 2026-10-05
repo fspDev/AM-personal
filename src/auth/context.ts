@@ -5,7 +5,7 @@ export interface Profile {
   /** uid de la cuenta con la que entró. */
   id: string
   rol: 'estudiante' | 'profe'
-  /** Ficha del estudiante (`amStudents/{sid}`); `null` para el profe. */
+  /** Ficha con el plan (`amStudents/{sid}`). La del profe, para su propia rutina, es `yo-{uid}`. */
   sid: string | null
   nombre: string
   apellido: string
@@ -40,6 +40,8 @@ export interface AuthValue {
   signOut: () => Promise<void>
   /** Sube los entrenos pendientes (no hace nada sin cuenta o sin conexión). */
   syncNow: () => void
+  /** Vuelve a leer los datos de la cuenta (después de que el profe los edita). */
+  refreshProfile: () => void
 }
 
 export const AuthContext = createContext<AuthValue | null>(null)
