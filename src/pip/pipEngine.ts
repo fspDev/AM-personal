@@ -32,6 +32,31 @@ const webkitPiP = () => typeof HTMLVideoElement !== 'undefined' && 'webkitSetPre
 export const isIOS = () =>
   typeof navigator !== 'undefined' && (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
 
+/**
+ * iPhone: Safari no deja poner en flotante un video dibujado en vivo (captureStream), sí un archivo.
+ * Se usa public/descanso.mp4 (scripts/video-descanso.mjs): una cuenta regresiva de 10:00 a 0:00 a 1 cuadro
+ * por segundo; para mostrar "quedan N s" se salta al segundo 600 − N y se deja correr. Abierta la ventana,
+ * la cuenta sigue sola aunque el iPhone congele la app en segundo plano.
+ */
+const IOS_COUNT = 600
+/** Cuadro quieto "A ENTRENAR" para cuando no hay cuenta regresiva (la serie). */
+const IOS_IDLE = 607
+let iosMode = false
+let pausingOurselves = false
+
+function syncIOS(f: PipFrame) {
+  if (!video || video.readyState < 1) return
+  const target = f.countdown === null ? IOS_IDLE : Math.max(0, IOS_COUNT - f.countdown)
+  if (Math.abs(video.currentTime - target) > 1.5) video.currentTime = target
+  const play = f.countdown !== null && f.countdown > 0 && !f.paused
+  if (play && video.paused) void video.play().catch(() => {})
+  if (!play && !video.paused) {
+    pausingOurselves = true
+    video.pause()
+    pausingOurselves = false
+  }
+}
+
 export function isPiPSupported(): boolean {
   return standardPiP() || webkitPiP()
 }
@@ -111,6 +136,7 @@ function setActionHandlers() {
 
 function ensureElements() {
   if (canvas) return
+  iosMode = isIOS()
   canvas = document.createElement('canvas')
   // Arranca en 5:4, la proporción con la que Android abrió la ventana en las pruebas; se ajusta a la real al abrirse.
   const start = canvasSizeFor(START_RATIO)
@@ -132,6 +158,10 @@ function ensureElements() {
       ? { position: 'fixed', left: '0', bottom: '0', width: '2px', height: '2px', opacity: '0.01', pointerEvents: 'none', zIndex: '-1' }
       : { position: 'fixed', left: '-9999px', top: '0', width: `${start.w}px`, height: `${start.h}px`, pointerEvents: 'none' },
   )
+  if (iosMode) {
+    video.preload = 'auto'
+    video.src = `${import.meta.env.BASE_URL}descanso.mp4`
+  }
   document.body.appendChild(video)
 
   video.addEventListener('enterpictureinpicture', (e) => {
@@ -150,7 +180,7 @@ function ensureElements() {
   // El ⏯ de la ventanita pausa el video: lo usamos para pausar el cronómetro y lo
   // volvemos a reproducir enseguida (un video pausado deja la ventana congelada).
   video.addEventListener('pause', () => {
-    if (!isPiPOpen()) return
+    if (pausingOurselves || !isPiPOpen()) return
     run(frame?.controls.playPause)
     void video?.play().catch(() => {})
   })
@@ -181,6 +211,7 @@ const PLACEHOLDER: PipFrame = {
   title: 'ENTRENO',
   sub: '',
   ring: null,
+  countdown: null,
   paused: false,
   controls: { next: null, prev: null, playPause: null, legend: '' },
 }
@@ -213,6 +244,17 @@ function watchWindow(win: PictureInPictureWindow | undefined) {
 
 async function ensureStream() {
   ensureElements()
+  if (iosMode) {
+    if (video && video.readyState < 1) {
+      await new Promise<void>((resolve) => {
+        const done = () => resolve()
+        video!.addEventListener('loadedmetadata', done, { once: true })
+        setTimeout(done, 3000)
+      })
+    }
+    syncIOS(frame ?? PLACEHOLDER)
+    return
+  }
   if (!stream && canvas && video) {
     stream = canvas.captureStream(4)
     video.srcObject = stream
@@ -237,7 +279,8 @@ export let lastPiPError: string | null = null
 export function renderPiP(f: PipFrame) {
   ensureElements()
   frame = f
-  if (ctx) drawFrame(ctx, f)
+  if (iosMode) syncIOS(f)
+  else if (ctx) drawFrame(ctx, f)
   setActionHandlers()
 }
 
@@ -287,8 +330,10 @@ export function disarmPiP() {
   stream?.getTracks().forEach((t) => t.stop())
   stream = null
   if (video) {
+    pausingOurselves = true
     video.pause()
-    video.srcObject = null
+    pausingOurselves = false
+    if (!iosMode) video.srcObject = null
   }
   for (const action of ['nexttrack', 'previoustrack', 'enterpictureinpicture'] as unknown as MediaSessionAction[]) {
     try {
@@ -317,6 +362,13 @@ export async function openPiP(): Promise<boolean> {
     lastPiPError = e instanceof Error ? `${e.name}: ${e.message}` : String(e)
     return false
   }
+}
+
+/** iPhone: deja el video cargado de antemano, así al tocar "Probar" o el botón flotante abre sin esperar. */
+export function preparePiP() {
+  if (!isPiPSupported()) return
+  ensureElements()
+  if (iosMode) video?.load()
 }
 
 export function closePiP() {

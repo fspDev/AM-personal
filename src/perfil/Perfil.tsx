@@ -8,7 +8,7 @@ import { fmtTime } from '../format'
 import { useDays } from '../rutina/useDays'
 import { updateSettings, useSettings, type Settings } from '../settings'
 import { askNotificationPermission, notificationPermission, showAlert } from '../notify'
-import { closePiP, isIOS, isPiPOpen, isPiPSupported, lastPiPError, openPiP } from '../pip/pipEngine'
+import { closePiP, isIOS, isPiPOpen, isPiPSupported, lastPiPError, openPiP, preparePiP } from '../pip/pipEngine'
 import { PALETTES } from '../theme'
 import styles from './Perfil.module.css'
 
@@ -47,6 +47,7 @@ export function Perfil() {
   const [probado, setProbado] = useState<string | null>(null)
   const [pipTest, setPipTest] = useState<string | null>(null)
   const s = useSettings()
+  useEffect(preparePiP, [])
   const { profile, signOut } = useAuth()
   const { rutina } = useDays()
   const nombre = `${profile?.nombre ?? ''} ${profile?.apellido ?? ''}`.trim() || 'Vos'

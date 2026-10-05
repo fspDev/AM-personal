@@ -35,6 +35,10 @@ En el teléfono: `localStorage` con prefijo `am:` (perfil, plan, ajustes, entren
 - Tiempos contra instantes de fin, nunca contando ticks. Lógica pura con tests de Vitest (cuentas, cuotas, plan, YouTube, listado).
 - Firestore no acepta `undefined` (se ignora con `ignoreUndefinedProperties`); preferir `null`.
 
+## Ventana flotante en iPhone
+
+Safari de iPhone no deja poner en flotante el video dibujado en vivo (canvas → captureStream) que se usa en Android: da NotSupportedError. En iPhone (`isIOS()` en `src/pip/pipEngine.ts`) se usa un archivo, `public/descanso.mp4` (cuenta regresiva de 10:00 a 1 cuadro por segundo, generado con `node scripts/video-descanso.mjs`, necesita ffmpeg): se salta al segundo 600 − restante y corre solo aunque iOS congele la app. Solo muestra la cuenta regresiva (no nombres ni controles). El video no está en el precache del service worker: necesita señal la primera vez.
+
 ## Probar y publicar
 
 ```bash
