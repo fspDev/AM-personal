@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { addBloque, addDia, fromRow, minutesOf, moveBloque, newBloque, nextLetter, parseKg, parseRest, patchBloque, removeBloque, removeDia, removedIds, rpeFor, toRows, totalMinutes, type ERutina } from './editor'
+import { rpeOf } from '../data'
+import { addBloque, addDia, fromRow, minutesOf, moveBloque, newBloque, nextLetter, parseKg, parseRest, patchBloque, removeBloque, removeDia, removedIds, toRows, totalMinutes, type ERutina } from './editor'
 import { mapBloque } from './mapRutina'
 
 
@@ -75,21 +76,24 @@ describe('editor de rutina', () => {
   })
 })
 
-describe('RPE por serie', () => {
-  it('se ajusta a la cantidad de series y es null si no hay ninguno', () => {
-    expect(rpeFor({ series: 3, rpe: [7, null, 9, 10] })).toEqual([7, null, 9])
-    expect(rpeFor({ series: 3, rpe: [8] })).toEqual([8, null, null])
-    expect(rpeFor({ series: 3, rpe: [null, null] })).toBeNull()
-    expect(rpeFor({ series: 2 })).toBeNull()
+describe('RPE por ejercicio', () => {
+  it('vale de 1 a 10; si no, null; una lista por serie ya publicada usa el primer valor', () => {
+    expect(rpeOf(8)).toBe(8)
+    expect(rpeOf(undefined)).toBeNull()
+    expect(rpeOf(0)).toBeNull()
+    expect(rpeOf(11)).toBeNull()
+    expect(rpeOf(7.5)).toBeNull()
+    expect(rpeOf([null, 9, 7])).toBe(9)
+    expect(rpeOf([null, null])).toBeNull()
   })
 
   it('ida y vuelta por las filas y llega al bloque de la app', () => {
-    const r: ERutina = { id: 'r', nombre: 'Plan', dias: [{ id: 'd', letra: 'A', bloques: [newBloque('fuerza', { id: 'b', nombre: 'Sentadilla', series: 3, rpe: [7, 8, 9] })] }] }
+    const r: ERutina = { id: 'r', nombre: 'Plan', dias: [{ id: 'd', letra: 'A', bloques: [newBloque('fuerza', { id: 'b', nombre: 'Sentadilla', series: 3, rpe: 8 })] }] }
     const { dias, bloques } = toRows(r)
-    expect(bloques[0].rpe).toEqual([7, 8, 9])
+    expect(bloques[0].rpe).toBe(8)
     const back = fromRow({ id: 'r', nombre: 'Plan', dias: dias.map((d) => ({ ...d, bloques: bloques.map(({ dia_id: _d, ...b }) => b) })) })
-    expect(back.dias[0].bloques[0].rpe).toEqual([7, 8, 9])
+    expect(back.dias[0].bloques[0].rpe).toBe(8)
     const block = mapBloque(bloques[0])
-    expect(block.kind === 'fuerza' && block.rpe).toEqual([7, 8, 9])
+    expect(block.kind === 'fuerza' && block.rpe).toBe(8)
   })
 })

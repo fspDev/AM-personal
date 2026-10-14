@@ -29,12 +29,18 @@ export interface StrengthBlock extends BlockBase {
   restSeconds?: number
   /** Salto de peso sugerido (kg) si la última vez se completó todo. */
   suggestion?: number
-  /** Escala de percepción del esfuerzo (1–10) que fija el profe para cada serie; `null` = sin indicar. */
-  rpe?: (number | null)[]
+  /** Esfuerzo percibido (RPE 1–10) que fija el profe para el ejercicio; sin indicar = `undefined`. */
+  rpe?: number
 }
 
 export const RPE_MIN = 1
 export const RPE_MAX = 10
+
+/** Entero de 1 a 10 o null; acepta la lista por serie de planes ya publicados (toma el primer valor). */
+export function rpeOf(v: unknown): number | null {
+  const one = Array.isArray(v) ? v.find((x) => x !== null && x !== undefined) : v
+  return typeof one === 'number' && Number.isInteger(one) && one >= RPE_MIN && one <= RPE_MAX ? one : null
+}
 
 export interface CircuitStep {
   name: string

@@ -1,4 +1,4 @@
-import type { Block, CircuitStep, Day } from '../data'
+import { rpeOf, type Block, type CircuitStep, type Day } from '../data'
 import { slugify } from '../keys'
 
 export interface BloqueRow {
@@ -22,8 +22,8 @@ export interface BloqueRow {
   comentario?: string | null
   /** Video de YouTube con la técnica. */
   video_url?: string | null
-  /** Solo fuerza: esfuerzo percibido (1–10) que indica el profe para cada serie. */
-  rpe?: (number | null)[] | null
+  /** Solo fuerza: esfuerzo percibido (1–10) que indica el profe para el ejercicio. */
+  rpe?: number | (number | null)[] | null
 }
 
 export interface DiaRow {
@@ -91,7 +91,7 @@ export function mapBloque(row: BloqueRow): Block {
         reps: row.reps ?? 10,
         weight: row.peso_kg ?? 0,
         restSeconds: row.descanso_s ?? undefined,
-        rpe: row.rpe?.some((r) => r !== null && r !== undefined) ? row.rpe : undefined,
+        rpe: rpeOf(row.rpe) ?? undefined,
       }
     case 'circuito': {
       const steps: CircuitStep[] = (row.pasos ?? []).map((p) => (p.segundos ? { name: p.nombre, seconds: p.segundos } : { name: p.nombre, reps: p.reps ?? 10 }))

@@ -1,3 +1,4 @@
+import { rpeOf } from '../data'
 import { uuid } from '../uuid'
 import type { BloqueRow } from '../rutina/mapRutina'
 
@@ -27,8 +28,8 @@ export interface EBloque {
   /** Indicación del profe y video de YouTube (cualquier tipo de bloque). */
   comentario?: string
   videoUrl?: string
-  /** Fuerza: esfuerzo percibido (1–10) por serie; puede ser más corto o largo que `series`. */
-  rpe?: (number | null)[]
+  /** Fuerza: esfuerzo percibido (RPE 1–10) del ejercicio. */
+  rpe?: number
 }
 
 export interface EDia {
@@ -98,12 +99,6 @@ export function moveBloque(r: ERutina, diaId: string, from: number, to: number):
   })
 }
 
-/** El RPE de cada serie, ajustado a la cantidad de series; `null` si no se indicó ninguno. */
-export function rpeFor(b: Pick<EBloque, 'series' | 'rpe'>): (number | null)[] | null {
-  const list = Array.from({ length: b.series }, (_, i) => b.rpe?.[i] ?? null)
-  return list.some((r) => r !== null) ? list : null
-}
-
 /** "1:30" → 90; "90" → 90; vacío o inválido → null. */
 export function parseRest(text: string): number | null {
   const t = text.trim()
@@ -159,7 +154,7 @@ export function toRows(r: ERutina): { dias: DiaWrite[]; bloques: BloqueWrite[] }
       indicacion: b.tipo === 'tiempo' ? (b.indicacion ?? null) : null,
       comentario: b.comentario?.trim() || null,
       video_url: b.videoUrl?.trim() || null,
-      rpe: b.tipo === 'fuerza' ? rpeFor(b) : null,
+      rpe: b.tipo === 'fuerza' ? rpeOf(b.rpe) : null,
     })),
   )
   return { dias, bloques }
@@ -208,7 +203,7 @@ export function fromRow(row: {
             indicacion: b.indicacion ?? null,
             comentario: b.comentario ?? '',
             videoUrl: b.video_url ?? '',
-            rpe: b.rpe ?? [],
+            rpe: rpeOf(b.rpe) ?? undefined,
           })),
       })),
   }

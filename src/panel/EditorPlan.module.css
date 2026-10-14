@@ -358,32 +358,20 @@
 
 .rpe {
   margin-top: 12px;
-}
-.rpeRow {
-  margin-top: 6px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.rpeCell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  align-items: center;
-}
-.rpeSerie {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
+  align-items: flex-start;
+  gap: 6px;
 }
 .rpeSelect {
-  min-width: 56px;
+  min-width: 140px;
   min-height: 44px;
-  padding: 0 8px;
-  border-radius: 10px;
-  border: 1px solid var(--line, currentColor);
-  background: var(--fill);
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--bg);
   color: var(--ink);
   font: inherit;
-  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
 }
