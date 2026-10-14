@@ -15,8 +15,8 @@ export function canvasSizeFor(ratio: number): { w: number; h: number } {
 
 const THEMES: Record<PipTheme, { bg: string; ink: string; muted: string; track: string; ring: string }> = {
   // Te toca: lima entero, se ve de reojo desde la otra punta del gimnasio.
-  accent: { bg: '#c6f135', ink: '#121212', muted: 'rgba(18,18,18,0.72)', track: 'rgba(20,20,20,0.2)', ring: '#141414' },
-  dark: { bg: '#141414', ink: '#f4f1ea', muted: '#a39e93', track: '#2b2a27', ring: '#c6f135' },
+  accent: { bg: '#c7ff00', ink: '#121212', muted: 'rgba(18,18,18,0.72)', track: 'rgba(20,20,20,0.2)', ring: '#141414' },
+  dark: { bg: '#141414', ink: '#f4f1ea', muted: '#a39e93', track: '#2b2a27', ring: '#c7ff00' },
   light: { bg: '#f4f1ea', ink: '#141414', muted: '#6b665d', track: '#dad4c8', ring: '#6f8a12' },
 }
 

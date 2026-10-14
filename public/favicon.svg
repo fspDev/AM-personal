@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
 <rect width="64" height="64" rx="14" fill="#121212"/>
-<svg x="8.96" y="14" width="46.08" height="36" viewBox="0 0 128 100">
-<defs><clipPath id="am-clip-9-14-46"><rect width="128" height="100"/></clipPath></defs>
-<g clip-path="url(#am-clip-9-14-46)" fill="none" stroke-miterlimit="20">
-<path d="M8 120 L36 0 L64 120" stroke="#ffffff" stroke-width="16"/>
-<path d="M23 72 H49" stroke="#ffffff" stroke-width="12"/>
-<path d="M78 130 L78 0 L99 62 L120 0 L120 130" stroke="#c6f135" stroke-width="16"/>
-</g></svg>
+<svg x="6.399999999999999" y="22.153846153846153" width="51.2" height="19.692307692307693" viewBox="0 0 312 120">
+<path d="M0 120 L102 0 L148 0 L148 120 L116 120 L116 34 L43 120 Z" fill="#ffffff"/>
+<path d="M152 59 L159 59 L218 0 L211 0 Z" fill="#c7ff00"/>
+<path d="M158 120 L167.5 56.5 L219.5 4.5 L235.9 54 L270 0 L312 0 L294 120 L252 120 L262.5 50 L228.4 104 L210.5 50 L200 120 Z" fill="#c7ff00"/>
+</svg>
 </svg>

@@ -1,34 +1,26 @@
-import { useId } from 'react'
-import { A_BAR, A_PATH, M_PATH, STROKE } from './logoGeometry'
+import { A_PATH, LOGO_H, LOGO_W, M_PATH, STRIPE_PATH } from './logoGeometry'
 import styles from './Logo.module.css'
 
-/** Monograma AM: la A toma el color del texto y la M el acento (legible en cualquier paleta). */
+/** Monograma AM: la A toma el color del texto y la raya y la M, el acento. */
 export function LogoMark({ height = 28, accent = 'var(--accent-ink)' }: { height?: number; accent?: string }) {
-  const clip = useId()
   return (
-    <svg width={(height * 128) / 100} height={height} viewBox="0 0 128 100" aria-hidden="true" className={styles.mark}>
-      <defs>
-        <clipPath id={clip}>
-          <rect width="128" height="100" />
-        </clipPath>
-      </defs>
-      <g clipPath={`url(#${clip})`} fill="none" strokeMiterlimit={20}>
-        <path d={A_PATH} stroke="currentColor" strokeWidth={STROKE} />
-        <path d={A_BAR} stroke="currentColor" strokeWidth={STROKE * 0.75} />
-        <path d={M_PATH} stroke={accent} strokeWidth={STROKE} />
-      </g>
+    <svg width={(height * LOGO_W) / LOGO_H} height={height} viewBox={`0 0 ${LOGO_W} ${LOGO_H}`} aria-hidden="true" className={styles.mark}>
+      <path d={A_PATH} fill="currentColor" />
+      <path d={STRIPE_PATH} fill={accent} />
+      <path d={M_PATH} fill={accent} />
     </svg>
   )
 }
 
-/** Logo completo: monograma + "ANDRÉS MILLARES · PERSONAL TRAINER". */
-export function Logo({ size = 'sm', accent }: { size?: 'sm' | 'lg'; accent?: string }) {
+/** Logo completo: horizontal (monograma | nombre) o, en grande, apilado y centrado. */
+export function Logo({ size = 'sm', accent, tag = 'PERSONAL TRAINER' }: { size?: 'sm' | 'lg'; accent?: string; tag?: string }) {
   return (
     <div className={styles.logo} data-size={size} role="img" aria-label="AM · Andrés Millares Personal Trainer">
-      <LogoMark height={size === 'lg' ? 150 : 30} accent={accent} />
+      <LogoMark height={size === 'lg' ? 120 : 22} accent={accent} />
+      {size === 'sm' && <span className={styles.divider} aria-hidden="true" />}
       <div className={styles.words}>
         <span className={styles.name}>ANDRÉS MILLARES</span>
-        <span className={styles.tag}>PERSONAL TRAINER</span>
+        <span className={styles.tag}>{tag}</span>
       </div>
     </div>
   )

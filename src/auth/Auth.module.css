@@ -27,18 +27,40 @@
   gap: 18px;
 }
 .name {
-  font-family: var(--font-display);
-  font-size: min(52px, 13vw);
+  font-family: var(--font-brand);
+  font-style: italic;
+  font-weight: 800;
+  font-size: min(46px, 11.5vw);
   line-height: 0.95;
-  letter-spacing: 0.01em;
 }
 .tag {
-  margin-top: 6px;
-  font-family: var(--font-label);
+  margin-top: 8px;
+  font-family: var(--font-brand);
   font-weight: 700;
-  font-size: 17px;
-  letter-spacing: 0.34em;
-  color: var(--muted);
+  font-size: min(16px, 4vw);
+  letter-spacing: 0.32em;
+  color: var(--accent-ink);
+}
+/* Lema de la marca: "TU MEJOR VERSIÓN / ES UN PLAN" con la raya flúor debajo. */
+.motto {
+  margin-top: 26px;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.3em;
+}
+.motto span {
+  color: var(--accent-ink);
+}
+.motto::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--accent-ink);
 }
 .lead {
   margin: 20px 0 0;

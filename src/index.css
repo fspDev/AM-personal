@@ -1,12 +1,12 @@
 :root {
   --bg: #f4f1ea;
   --ink: #141414;
-  /* Acento: lima de la marca AM. Va con texto oscuro encima (con blanco no se lee). */
-  --accent: #c6f135;
-  --accent-pressed: #a9d21c;
+  /* Acento: verde flúor de la marca AM (#C7FF00). Va con texto oscuro encima (con blanco no se lee). */
+  --accent: #c7ff00;
+  --accent-pressed: #a6d600;
   --on-accent: #121212;
   /* El acento cuando se usa como TEXTO o borde sobre el fondo: lo ajusta la paleta para que se lea. */
-  --accent-ink: #c6f135;
+  --accent-ink: #c7ff00;
   --muted: #6b665d;
   --muted-2: #9a948a;
   --fill: #e6e1d6;
@@ -21,6 +21,8 @@
   --dark-sheet: #22211e;
 
   --font-display: Anton, sans-serif;
+  /* Tipografía de la marca: nombre (negrita itálica) y bajadas espaciadas. */
+  --font-brand: Saira, 'Barlow Condensed', sans-serif;
   --font-label: 'Barlow Condensed', sans-serif;
   --font-body: Inter, system-ui, sans-serif;
 }

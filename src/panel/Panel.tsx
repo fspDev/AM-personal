@@ -23,7 +23,8 @@ export function Panel() {
     <div className={styles.layout}>
       <header className={styles.side}>
         <div className={styles.brand}>
-          <LogoMark height={34} />
+          <LogoMark height={26} />
+          <span className={styles.brandDivider} aria-hidden="true" />
           <div className={styles.brandText}>
             <span className={styles.brandName}>ANDRÉS MILLARES</span>
             <span className={styles.brandTag}>PANEL DEL PROFE</span>

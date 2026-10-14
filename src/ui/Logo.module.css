@@ -10,7 +10,15 @@
 }
 .logo[data-size='lg'] {
   flex-direction: column;
-  gap: 28px;
+  gap: 26px;
+}
+
+/* Separador vertical flúor del logo horizontal. */
+.divider {
+  align-self: stretch;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent-ink);
 }
 
 .words {
@@ -23,22 +31,24 @@
 }
 
 .name {
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
+  font-style: italic;
+  font-weight: 800;
   font-size: 15px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
 }
 .tag {
-  font-family: var(--font-label);
-  font-weight: 700;
-  font-size: 9px;
-  letter-spacing: 0.32em;
   margin-top: 3px;
-  opacity: 0.7;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: 8.5px;
+  letter-spacing: 0.32em;
+  color: var(--accent-ink);
 }
 .logo[data-size='lg'] .name {
-  font-size: 64px;
+  font-size: 60px;
 }
 .logo[data-size='lg'] .tag {
-  font-size: 26px;
+  font-size: 22px;
   margin-top: 12px;
 }

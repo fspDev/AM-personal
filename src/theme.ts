@@ -11,7 +11,7 @@ export interface Palette {
 }
 
 /** Lima de la marca AM (ver src/ui/logoGeometry.ts). Con texto oscuro encima. */
-export const ACCENT = '#c6f135'
+export const ACCENT = '#c7ff00'
 
 export const PALETTES: Palette[] = [
   { id: 'am', nombre: 'AM', bg: '#121212', ink: '#ffffff' },

@@ -27,7 +27,7 @@ export function Ingreso() {
   return (
     <div className={styles.page}>
       <div className={styles.brand}>
-        <LogoMark height={64} />
+        <LogoMark height={56} />
         <div>
           <div className={styles.name}>ANDRÉS MILLARES</div>
           <div className={styles.tag}>PERSONAL TRAINER</div>
@@ -61,7 +61,11 @@ function Entrar({ onCrearProfe }: { onCrearProfe: (() => void) | null }) {
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
-      <p className={styles.lead}>Tu plan de entrenamiento, armado por tu profe. Apretás empezar y la app te lleva.</p>
+      <div className={styles.motto}>
+        TU MEJOR VERSIÓN
+        <br />
+        <span>ES UN PLAN</span>
+      </div>
       <div className={styles.grow} />
       <label htmlFor="usuario" className={styles.label}>
         USUARIO
