@@ -1,4 +1,4 @@
-import { A_PATH, LOGO_H, LOGO_W, M_PATH, STRIPE_PATH } from './logoGeometry'
+import { A_PATH, ACCENT_PATH, LOGO_H, LOGO_W } from './logoGeometry'
 import styles from './Logo.module.css'
 
 /** Monograma AM: la A toma el color del texto y la raya y la M, el acento. */
@@ -6,8 +6,7 @@ export function LogoMark({ height = 28, accent = 'var(--accent-ink)' }: { height
   return (
     <svg width={(height * LOGO_W) / LOGO_H} height={height} viewBox={`0 0 ${LOGO_W} ${LOGO_H}`} aria-hidden="true" className={styles.mark}>
       <path d={A_PATH} fill="currentColor" />
-      <path d={STRIPE_PATH} fill={accent} />
-      <path d={M_PATH} fill={accent} />
+      <path d={ACCENT_PATH} fill={accent} />
     </svg>
   )
 }

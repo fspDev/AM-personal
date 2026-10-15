@@ -30,7 +30,7 @@ En el teléfono: `localStorage` con prefijo `am:` (perfil, plan, ajustes, entren
 ## Convenciones
 
 - React + TypeScript + Vite, CSS Modules con las variables de `src/index.css`/`src/theme.ts`. Sin librerías de UI.
-- Marca (manual de marca de Andrés): monograma AM con A itálica, raya diagonal y M flúor (`src/ui/logoGeometry.ts`, recreado en vector; `src/ui/Logo.tsx`), verde flúor `#C7FF00` con texto oscuro encima (`--on-accent`) y blanco; como texto o borde sobre el fondo usar `--accent-ink`. Nombre en Saira 800 itálica y bajadas ("PERSONAL TRAINER", lema "TU MEJOR VERSIÓN ES UN PLAN") en Saira 700 espaciada (`--font-brand`); el resto de la interfaz sigue en Anton / Barlow Condensed / Inter. Íconos: `node scripts/iconos.mjs`; video del iPhone: `node scripts/video-descanso.mjs`.
+- Marca (manual de marca de Andrés): monograma AM con A itálica, raya diagonal y M flúor (`src/ui/logoGeometry.ts`, tomado del archivo oficial am_logo.svg; `src/ui/Logo.tsx`), verde flúor `#C7FF00` con texto oscuro encima (`--on-accent`) y blanco; como texto o borde sobre el fondo usar `--accent-ink`. Nombre en Saira 800 itálica y bajadas ("PERSONAL TRAINER", lema "TU MEJOR VERSIÓN ES UN PLAN") en Saira 700 espaciada (`--font-brand`); el resto de la interfaz sigue en Anton / Barlow Condensed / Inter. Íconos: `node scripts/iconos.mjs`; video del iPhone: `node scripts/video-descanso.mjs`.
 - Textos en español rioplatense (vos), números `es-AR`. Áreas táctiles ≥ 44 px. El panel tiene que andar en el celular.
 - Tiempos contra instantes de fin, nunca contando ticks. Lógica pura con tests de Vitest (cuentas, cuotas, plan, YouTube, listado).
 - Firestore no acepta `undefined` (se ignora con `ignoreUndefinedProperties`); preferir `null`.

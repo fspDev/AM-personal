@@ -11,7 +11,7 @@ import { writeFileSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Resvg } from '@resvg/resvg-js'
-import { monogramSvg } from '../src/ui/logoGeometry.ts'
+import { LOGO_H, LOGO_W, monogramSvg } from '../src/ui/logoGeometry.ts'
 
 const FONT = 'C\\:/Windows/Fonts/impact.ttf'
 const LIME = '0xC7FF00'
@@ -30,7 +30,7 @@ const dir = mkdtempSync(join(tmpdir(), 'am-video-'))
 const script = join(dir, 'filter.txt')
 const mark = join(dir, 'mark.png')
 // Monograma arriba a la izquierda, como en el resto de la app.
-writeFileSync(mark, new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${MARK_W}" height="${(MARK_W * 120) / 312}">${monogramSvg({ width: MARK_W })}</svg>`).render().asPng())
+writeFileSync(mark, new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${MARK_W}" height="${(MARK_W * LOGO_H) / LOGO_W}">${monogramSvg({ width: MARK_W })}</svg>`).render().asPng())
 writeFileSync(script, `[0:v]${filter}[bg];[bg][1:v]overlay=22:22`)
 try {
   execFileSync(

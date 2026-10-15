@@ -2,13 +2,13 @@
 // Uso: node scripts/iconos.mjs
 import { Resvg } from '@resvg/resvg-js'
 import { writeFileSync } from 'node:fs'
-import { monogramSvg } from '../src/ui/logoGeometry.ts'
+import { LOGO_H, LOGO_W, monogramSvg } from '../src/ui/logoGeometry.ts'
 
 const BG = '#121212'
 
 function icon(size, { logo = 0.7, radius = 0 } = {}) {
   const w = size * logo
-  const h = (w * 120) / 312
+  const h = (w * LOGO_H) / LOGO_W
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
 <rect width="${size}" height="${size}" rx="${radius}" fill="${BG}"/>
 ${monogramSvg({ x: (size - w) / 2, y: (size - h) / 2, width: w })}
